@@ -1,6 +1,16 @@
 <?php
 require __DIR__ . "/vendor/autoload.php";
 
+try{
+    $pdo = new PDO('mysql:host=127.0.0.1;dbname=Jeu', "root", "");
+} catch (Exception $e){
+    echo "erreur de connection à la base de donnée";
+}
+
+$select_personnages = $pdo->prepare('SELECT * FROM Personnages WHERE pv>10');
+$select_personnages->execute();
+$personnages = $select_personnages->fetchAll(PDO::FETCH_OBJ);
+
 ## ETAPE 0
 
 ## CONNECTEZ VOUS A VOTRE BASE DE DONNEE
@@ -51,18 +61,56 @@ require __DIR__ . "/vendor/autoload.php";
 <h1>Combats</h1>
 <div class="w-100 mt-5">
 
-    <form action="">
+    <form method="POST">
         <div class="form-group">
-            <select name="" id=""></select>
+            <select name="personnage1" id="personnage1">
+            <?php foreach($personnages as $key =>$value): ?>
+                    <option value="<?php echo $value->name?>"><?php echo $value->name?></option>
+                <?php endforeach; ?>
+            
+            </select>
         </div>
         <div class="form-group">
-            <select name="" id=""></select>
+            <select name="personnage2" id="personnage2">
+            <?php foreach($personnages as $key =>$value): ?>
+                    <option value="<?php echo $value->name?>"><?php echo $value->name?></option>
+                <?php endforeach; ?>
+            </select>
         </div>
 
         <button class="btn">Fight</button>
     </form>
+    </div>
 
-</div>
+    <?php
+    if(!empty($_POST["personnage1"])&&!empty($_POST["personnage2"])) {
+
+    $personnage1=$_POST["personnage1"];
+    $personnage2=$_POST["personnage2"];
+
+    $select_stats1 = $pdo->prepare('SELECT * FROM Personnages WHERE name IN("'.$personnage1.'","'.$personnage2.'")');
+    $select_stats1->execute();
+    
+
+    $stats1= $select_stats1->fetchAll(PDO::FETCH_OBJ);
+   
+     
+
+    $atk_perso1=$stats1[0]->atk;
+    $atk_perso2=$stats1[1]->atk;
+
+    $pv_perso1=$stats1[0]->pv;
+    $pv_perso2=$stats1[1]->pv;
+
+    while($pv_perso1>0 && $pv_perso2>0 ) {
+    $pv_perso1=$pv_perso1-$atk_perso2;
+    echo "Le personnage " . $personnage1 . " a perdu " . $atk_perso2 . " PV" . "<br>";
+    $pv_perso2= $pv_perso2-$atk_perso1;
+    echo "Le personnage " . $personnage2 . " a perdu " . $atk_perso1 . " PV" . "<br>";
+
+    } 
+}
+?>
 
 </body>
 </html>

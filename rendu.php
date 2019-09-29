@@ -1,6 +1,11 @@
 <?php
 require __DIR__ . "/vendor/autoload.php";
 
+try{
+    $pdo = new PDO('mysql:host=127.0.0.1;dbname=Jeu', "root", "");
+} catch (Exception $e){
+    echo "erreur de connection à la base de donnée";
+}
 ## ETAPE 0
 
 ## CONNECTEZ VOUS A VOTRE BASE DE DONNEE
@@ -12,7 +17,7 @@ require __DIR__ . "/vendor/autoload.php";
  * personnages
  * id : primary_key int (11)
  * name : varchar (255)
- * atk : int (11)
+ * atk : int (11)s
  * pv: int (11)
  * type_id : int (11)
  * stars : int (11)
@@ -38,6 +43,11 @@ require __DIR__ . "/vendor/autoload.php";
 
 # AFFICHER DANS LE SELECTEUR (<select name="" id="">) tout les types qui sont disponible (cad tout les type contenu dans la table types)
 
+$select_types=$pdo->prepare('SELECT*FROM Types');
+$select_types->execute();
+
+$types=$select_types->fetchAll(PDO::FETCH_OBJ);
+
 
 #######################
 ## ETAPE 4
@@ -52,6 +62,9 @@ require __DIR__ . "/vendor/autoload.php";
 ## ETAPE 6
 
 # ENREGISTRER 5 / 6 PERSONNAGE DIFFERENT
+
+
+
 
 ?>
 
@@ -78,25 +91,51 @@ require __DIR__ . "/vendor/autoload.php";
     <form action="" method="POST" class="form-group">
         <div class="form-group col-md-4">
             <label for="">Nom du personnage</label>
-            <input type="text" class="form-control" placeholder="Nom">
+            <input type="text" class="form-control" placeholder="Nom" name="nom_perso">
         </div>
 
         <div class="form-group col-md-4">
             <label for="">Attaque du personnage</label>
-            <input type="text" class="form-control" placeholder="Atk">
+            <input type="text" class="form-control" placeholder="Atk" name="nom_atk">
         </div>
         <div class="form-group col-md-4">
             <label for="">Pv du personnage</label>
-            <input type="text" class="form-control" placeholder="Pv">
+            <input type="text" class="form-control" placeholder="Pv" name="nom_pv">
         </div>
         <div class="form-group col-md-4">
             <label for="">Type</label>
-            <select name="" id="">
-                <option value="" selected disabled>Choissisez un type</option>
+            <select name="nom_types" id="">
+                <option value="" selected disabled >Choissisez un type</option>
+
+                <?php foreach($types as $key =>$value): ?>
+                    <option value="<?php echo $value->id?>"><?php echo $value->name?></option>
+                <?php endforeach; ?>
             </select>
+                
+            
         </div>
         <button class="btn btn-primary">Enregistrer</button>
     </form>
+    <?php 
+    if(!empty($_POST)){
+
+        $nom=$_POST["nom_perso"];
+        $atk=$_POST["nom_atk"];
+        $pv=$_POST["nom_pv"];
+        $types=$_POST["nom_types"];
+        
+
+        $ajout_form = $pdo->prepare('INSERT INTO Personnages (name,atk,pv,type_id) VALUES ("'.$nom.'",'.$atk.','.$pv.','.$types.')');
+        
+       
+
+        if($ajout_form->execute()){
+            echo "Personnage ".$nom. " créer ";
+        }
+
+        
+    }
+    ?>
 </div>
 
 </body>

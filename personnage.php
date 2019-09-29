@@ -1,6 +1,11 @@
 <?php
 require __DIR__ . "/vendor/autoload.php";
 
+
+$pdo = new PDO('mysql:host=127.0.0.1;dbname=Jeu', "root", "");
+
+
+
 ## ETAPE 0
 
 ## CONNECTEZ VOUS A VOTRE BASE DE DONNEE
@@ -8,6 +13,9 @@ require __DIR__ . "/vendor/autoload.php";
 ## ETAPE 1
 
 ## RECUPERER TOUT LES PERSONNAGES CONTENU DANS LA TABLE personnages
+$select_personnages = $pdo->prepare('SELECT * FROM Personnages');
+$select_personnages->execute();
+$personnages = $select_personnages->fetchAll(PDO::FETCH_ASSOC);
 
 ## ETAPE 2
 
@@ -30,7 +38,7 @@ require __DIR__ . "/vendor/autoload.php";
 
 
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport"
@@ -48,6 +56,29 @@ require __DIR__ . "/vendor/autoload.php";
 </nav>
 <h1>Mes personnages</h1>
 <div class="w-100 mt-5">
+
+<?php
+foreach ($personnages as $personnage_value) {
+    if(isset($_POST["etoile" . $personnage_value["name"]])){
+        
+        $personnage_value["stars"]++;
+        $ajout_stars = $pdo->prepare('UPDATE Personnages SET stars=:stars WHERE name=:name');
+        $ajout_stars->execute([":stars"=>$personnage_value["stars"], ":name"=>$personnage_value["name"]]);
+        echo $personnage_value["name"] . " a gagné 1 étoile" . "<br>";
+    }
+    echo "Personnage : ".$personnage_value["name"] . "  Pv=" .$personnage_value["pv"] . " Atk=" . $personnage_value["atk"] . " Etoiles=" . $personnage_value["stars"] . " " . "<br>"; ?>
+    
+    <form method=POST>
+    <button name="etoile<?php echo $personnage_value["name"] ?>" class="btn"> STARS</button>
+    <br>
+    <br>
+    </form> 
+
+    <?php
+}
+?>
+
+
 
 </div>
 
